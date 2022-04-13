@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="UserTdDAO">
+    <insert id="joinWriterToTask" parameterType="tdt">
+        INSERT INTO user_todo(userNo,groupNo,tdtNo)
+        VALUES (#{tdt_writer}, #{tdt_groupNo}, #{tdt_No})
+    </insert>
+
+    <insert id="joinUserToTask" parameterType="ut">
+        INSERT INTO user_todo(userNo,groupNo,tdtNo)
+        VALUES (#{userNo}, #{groupNo}, #{tdtNo})
+    </insert>
+
+    <delete id="quitUserFromTask" parameterType="ut">
+        DELETE FROM user_todo
+        WHERE userNo=#{userNo} AND tdtNo=#{tdtNo}
+    </delete>
+
+    <select id="getTaskMembers" parameterType="int" resultType="ut">
+        SELECT ut.*, u.userId, u.userName FROM user_todo AS ut
+                                         JOIN user AS u
+                                              ON u.userNo = ut.userNo
+        WHERE tdtNo=#{tdtNo}
+    </select>
+
+    <select id="alreadyMember" parameterType="HashMap" resultType="boolean">
+       SELECT IF(COUNT(*) = 1, 1, 0) FROM user_todo
+       WHERE userNo=#{userNo} AND tdtNo=#{tdtNo}
+    </select>
+
+    <select id="countTaskMembers" parameterType="int" resultType="tdt">
+        SELECT tdt.*, COUNT(ut.tdtNo) AS memberCount
+        FROM todo_task AS tdt
+                 LEFT JOIN user_todo AS ut
+                           ON tdt.tdt_No=ut.tdtNo
+        WHERE tdt_No=#{tdtNo}
+        GROUP BY tdt.tdt_No;
+    </select>
+
+    <select id="getMyTasks" parameterType="int" resultType="tdtDetail">
+        SELECT tdt.* , tdr.tdr_No, (SELECT count(*)
+                                        FROM user_todo AS ut
+                                        WHERE ut.tdtNo=tdt.tdt_No) AS total,
+                                        (SELECT count(*)
+                                        FROM todo_record AS tdr
+                                        WHERE tdr.tdtNo=tdt.tdt_No
+                                          AND DATE(tdr.tdr_recordDate)=DATE(now())) AS today
+        FROM todo_task AS tdt
+                 LEFT JOIN user_todo AS ut
+                           ON tdt.tdt_No=ut.tdtNo
+                 LEFT JOIN todo_record AS tdr
+                           ON tdt.tdt_No=tdr.tdtNo AND DATE(tdr.tdr_recordDate)=DATE(now())
+        WHERE ut.userNo = #{userNo} ;
+    </select>
+</mapper>

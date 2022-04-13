@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="UserDAO">
+    <insert id="insertUser" parameterType="user" useGeneratedKeys="true" keyProperty="userNo">
+		INSERT INTO user(userId,userPwd,userName,email,profImg,profImgThumb)
+		VALUES (#{userId},#{userPwd},#{userName},#{email},#{profImg},#{profImgThumb})
+	</insert>
+
+	<update id="updateUser" parameterType="user">
+	UPDATE user
+	  <set>
+	    <if test="userPwd != null"> userPwd=#{userPwd}, </if>
+		<if test="userName != null"> userName=#{userName}, </if>
+		<if test="email != null"> email=#{userPwd},</if>
+		<if test="userPublic != null"> userPublic=#{userPublic}</if>
+	  </set>
+	WHERE userNo=#{userNo}
+	</update>
+
+	<delete id="deleteUser" parameterType="user">
+		DELETE FROM user
+		WHERE userNo = #{userNo}
+	</delete>
+
+	<select id="getUser" parameterType="user" resultType="user">
+		SELECT * FROM user
+		<where>
+		  <if test="userNo!=null"> userNo = #{userNo} </if>
+		  <if test="userId!=null">OR userId = #{userId} </if>
+		</where>
+	</select>
+
+	<select id="getUserByNo" resultType="user">
+		SELECT * FROM user WHERE userNo = #{userNo}
+	</select>
+	<select id="getUserById" parameterType="String" resultType="user">
+		SELECT * FROM user WHERE userId = #{userId}
+	</select>
+	<select id="checkIdExist" parameterType="String" resultType="boolean">
+		SELECT IF(COUNT(*) = 1, 1, 0) FROM user WHERE userId = #{userId}
+	</select>
+
+	<select id="getUserList" resultType="user">
+		SELECT * FROM user WHERE userNo = #{userNo}
+	</select>
+</mapper>

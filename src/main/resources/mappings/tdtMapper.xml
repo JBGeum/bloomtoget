@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="TdtDAO">
+
+    <insert id="insertTodoTask" parameterType="tdt"  useGeneratedKeys="true" keyProperty="tdt_No">
+        INSERT INTO todo_task(tdt_writer, tdt_active, tdt_public, tdt_goal, tdt_groupNo)
+        VALUES (#{tdt_writer}, #{tdt_active}, #{tdt_public}, #{tdt_goal}, #{tdt_groupNo})
+    </insert>
+
+    <select id="getTaskByTdtNo" resultType="tdtDetail">
+        SELECT tdt.*, (SELECT u.userName FROM user AS u
+                       WHERE tdt.tdt_writer = u.userNo) AS writerName
+        FROM todo_task AS tdt WHERE tdt_No=#{tdt_No}
+    </select>
+
+    <update id="updateTodoTask">
+        UPDATE todo_task
+        SET tdt_goal=#{tdt_goal}, tdt_active=#{tdt_active}, tdt_public=#{tdt_public}
+        WHERE tdt_No=#{tdt_No}
+    </update>
+
+<!--    그룹번호를 받아서 task 정보 검색-->
+    <select id="getGroupTdtList" parameterType="int" resultType="tdtDetail">
+        SELECT tdt.*, COUNT(ut.tdtNo) AS memberCount, (SELECT u.userName FROM user AS u
+                                             WHERE tdt.tdt_writer = u.userNo) AS writerName
+        FROM todo_task AS tdt
+                 LEFT JOIN user_todo AS ut
+                           ON tdt.tdt_No=ut.tdtNo
+        WHERE tdt_groupNo=#{groupNo}
+        GROUP BY tdt.tdt_No
+    </select>
+
+<!--    userNo를 받아 그룹 내 참여중인 task 검색-->
+    <select id="getUserTdtList" parameterType="int" resultType="tdtDetail">
+        SELECT tdt.*, COUNT(ut.tdtNo) AS memberCount, (SELECT u.userName FROM user AS u
+                                                       WHERE tdt.tdt_writer = u.userNo) AS writerName
+        FROM todo_task AS tdt
+                 LEFT JOIN user_todo AS ut
+                           ON tdt.tdt_No=ut.tdtNo
+        WHERE ut.userNo=#{userNo}
+        GROUP BY tdt.tdt_No
+    </select>
+
+<!--    userNo를 받아 그룹 내 참여중이 아닌 task 검색-->
+    <select id="getOtherTdtList" parameterType="int" resultType="tdtDetail">
+        SELECT tdt.*, COUNT(ut.tdtNo) AS memberCount, (SELECT u.userName FROM user AS u
+                                                       WHERE tdt.tdt_writer = u.userNo) AS writerName
+        FROM todo_task AS tdt
+                 LEFT JOIN user_todo AS ut
+                           ON tdt.tdt_No=ut.tdtNo
+        WHERE ut.tdtNo NOT IN (SELECT tdtNo FROM user_todo WHERE userNo=#{userNo})
+          AND ut.groupNo = (SELECT groupNo FROM user WHERE userNo=#{userNo})
+        GROUP BY tdt.tdt_No
+    </select>
+</mapper>

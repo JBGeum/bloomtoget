@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="GroupDAO">
+
+    <insert id="insertGroup" parameterType="group" useGeneratedKeys="true" keyProperty="groupNo">
+		INSERT INTO userGroup(groupName,groupAdmin,groupDesc)
+		VALUES (#{groupName},#{groupAdmin},#{groupDesc})
+	</insert>
+
+	<update id="updateGroup" parameterType="group">
+	UPDATE userGroup
+	  <set>
+		<if test="groupName != null"> groupName = #{groupName}, </if>
+		<if test="groupDesc != null"> groupDesc = #{groupDesc},</if>
+		<if test="groupPublic != null"> groupPublic = #{groupPublic}</if>
+	  </set>
+	WHERE groupNo=#{groupNo}
+	</update>
+	<update id="changeAdmin" parameterType="group">
+		UPDATE userGroup SET groupAdmin=#{groupAdmin} WHERE groupNo=#{groupNo}
+	</update>
+
+	<delete id="deleteGroup" parameterType="int">
+		DELETE FROM userGroup
+		WHERE groupNo = #{groupNo}
+	</delete>
+
+	<select id="getGroup" parameterType="group" resultType="group">
+		SELECT * FROM userGroup
+		<where>
+			<if test="groupNo!=null"> groupNo = #{groupNo} </if>
+			<if test="groupName!=null">OR groupName = #{groupName} </if>
+			<if test="groupPublic!=null">AND groupPublic = #{groupPublic} </if>
+		</where>
+	</select>
+
+	<select id="getGroupByNo" parameterType="int" resultType="group">
+		SELECT * FROM userGroup
+		WHERE groupNo = #{groupNo}
+	</select>
+
+	<select id="getMyGroup" parameterType="int" resultType="group">
+		SELECT * FROM userGroup AS g
+		JOIN user AS u ON u.groupNo = g.groupNo
+		WHERE u.userNo = ${userNo};
+	</select>
+
+	<select id="checkGroupPublic" parameterType="int" resultType="group">
+		SELECT * FROM userGroup
+		WHERE groupNo = #{groupNo} AND groupPublic = 0
+	</select>
+
+	<select id="getPublicGroupList" resultType="group">
+		SELECT * FROM userGroup WHERE groupPublic = 0
+	</select>
+
+<!--	가능하다면 인원수도 되돌려 준 다음, resultmap 따로 설정-->
+	<select id="getJoinableGroupList" resultType="group">
+		<![CDATA[
+			SELECT * FROM userGroup
+			WHERE groupPublic = 1 AND
+			 groupNo IN
+			(SELECT groupNo FROM user
+			GROUP BY groupNo
+			having count(*)<6 AND groupNo>0);
+		]]>
+	</select>
+
+<!--	인원수 쿼리 따로-->
+	<select id="getJoinableGroupMember" resultType="String">
+		<![CDATA[
+		SELECT count(*) FROM user
+		GROUP BY groupNo
+		having count(*)<6 AND groupNo>0;
+		]]>
+	</select>
+
+
+	<select id="joinableCheck" parameterType="int" resultType="boolean">
+		<![CDATA[
+		SELECT IF(COUNT(*) = 1, 1, 0) FROM userGroup
+		WHERE groupPublic = 0 AND groupNo=${groupNo} AND
+				groupNo IN
+				(SELECT groupNo FROM user
+				 GROUP BY groupNo
+				 having count(*)<6 AND groupNo>0);
+		]]>
+	</select>
+
+	<select id="getUserGroupNo" parameterType="int" resultType="int">
+		SELECT groupNo FROM user WHERE userNo=#{userNo};
+	</select>
+
+	<select id="getGroupAdmin" parameterType="int" resultType="int">
+		SELECT groupAdmin FROM userGroup
+		WHERE groupNO = ${groupNo}
+	</select>
+
+	<update id="joinGroup" parameterType="HashMap">
+		UPDATE user SET
+			groupNo = #{groupNo}
+		WHERE userNo=#{userNo}
+	</update>
+
+	<update id="requestJoinGroup" parameterType="HashMap">
+		UPDATE user SET
+			groupNo = -#{groupNo}
+		WHERE userNo=#{userNo}
+	</update>
+
+	<select id="getJoinRequestingUsers" parameterType="int" resultType="user">
+		SELECT * FROM user
+		WHERE groupNo= -${groupNo};
+	</select>
+
+	<update id="allowJoinRequest" parameterType="int">
+		UPDATE user SET
+		groupNo = -groupNo
+		WHERE userNo=#{userNo}
+	</update>
+	<update id="declineJoinRequest" parameterType="int">
+		UPDATE user SET
+			groupNo = 0
+		WHERE userNo=#{userNo}
+	</update>
+
+	<update id="declineAllJoinRequest" parameterType="int">
+		UPDATE user SET
+			groupNo = 0
+		WHERE groupNo= -#{groupNo}
+	</update>
+
+	<select id="getGroupMembersNum" parameterType="int" resultType="int">
+		SELECT count(*) FROM user
+		WHERE groupNo=#{groupNo};
+	</select>
+
+	<update id="quitGroup" parameterType="int">
+		UPDATE user SET groupNo=0 WHERE userNo=#{userNo}
+	</update>
+
+	<update id="gainExp" parameterType="int">
+		UPDATE userGroup
+		SET groupExp = groupExp + ${gainExp}
+		WHERE groupNo=#{groupNo}
+	</update>
+
+	<update id="lvUp">
+		UPDATE userGroup
+		SET groupExp = groupExp - 10, groupLv = groupLv + 1
+		WHERE groupNo=#{groupNo}
+	</update>
+
+	<select id="getGroupMembers" parameterType="int" resultType="user">
+		SELECT * FROM user WHERE groupNo=#{groupNo}
+	</select>
+
+
+
+
+</mapper>
