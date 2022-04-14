@@ -120,9 +120,6 @@
                 </c:choose>
                     </div>
                 <br>
-                (공통) 오늘의 그룹 todolist
-                ||
-                달성현황
             </c:when>
                 <c:when test="${status eq 'requestProcessing'}">
                     현재 그룹에 가입 신청중인 상태입니다.<br>

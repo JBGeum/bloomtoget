@@ -63,10 +63,13 @@
                     </c:when>
                     <c:otherwise>
                         <li class="nav-item">
-                            <a class="nav-link ps-2" href="#">비로그인시</a>
+                            <a class="nav-link ps-2" href="#">About</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link ps-2" href="#">표시될메뉴들</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle ps-2" data-bs-toggle="dropdown" href="/group/joinsearch" role="button" aria-haspopup="true" aria-expanded="false">Group</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/group/joinsearch">그룹 탐색</a>
+                            </div>
                         </li>
                     </c:otherwise>
                 </c:choose>

@@ -104,8 +104,8 @@
 </head>
 <body>
 <c:import url="/resource/import/nav.jsp" />
-<div class="container-fluid custom-contents">
-        <main>
+<div class="container-fluid custom-contents align-items-center">
+        <main class="m-auto">
             <div class="py-5">
                 <div class="input-form">
         <c:choose>
@@ -147,7 +147,7 @@
                 <br>
 
 
-                <%=request.getRealPath("/")%><br>
+<%--                <%=request.getRealPath("/")%><br>--%>
             </c:when>
             <c:otherwise>
                 로그인 된 상태입니다.<br>

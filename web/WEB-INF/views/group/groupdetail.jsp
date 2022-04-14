@@ -98,7 +98,6 @@
                     </div>
                 </div>
                 <br>
-                회원 정보 가져오기?
         </c:when>
         <c:otherwise>
             다른 오류

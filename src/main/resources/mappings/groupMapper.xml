@@ -49,11 +49,11 @@
 
 	<select id="checkGroupPublic" parameterType="int" resultType="group">
 		SELECT * FROM userGroup
-		WHERE groupNo = #{groupNo} AND groupPublic = 0
+		WHERE groupNo = #{groupNo} AND groupPublic = 1
 	</select>
 
 	<select id="getPublicGroupList" resultType="group">
-		SELECT * FROM userGroup WHERE groupPublic = 0
+		SELECT * FROM userGroup WHERE groupPublic = 1
 	</select>
 
 <!--	가능하다면 인원수도 되돌려 준 다음, resultmap 따로 설정-->
@@ -81,7 +81,7 @@
 	<select id="joinableCheck" parameterType="int" resultType="boolean">
 		<![CDATA[
 		SELECT IF(COUNT(*) = 1, 1, 0) FROM userGroup
-		WHERE groupPublic = 0 AND groupNo=${groupNo} AND
+		WHERE groupPublic = 1 AND groupNo=${groupNo} AND
 				groupNo IN
 				(SELECT groupNo FROM user
 				 GROUP BY groupNo

@@ -195,3 +195,6 @@ $RECYCLE.BIN/
 /src/main/java/com/bloomtoget/util/Path.java
 /src/main/resources/mappings/testMapper.xml
 /src/main/resources/sqlMapConfig.xml
+/web/resource/fonts/
+/web/resource/img/
+/web/resource/imgUpload/

@@ -40,7 +40,7 @@
         <div class="col-md-10 p-3">
             <div class="card border-primary mb-3" style="max-width: 1000px;">
                 <div class="card-header">
-                    <h4 class="card-title my-2"><i class="fa-solid fa-table-list"></i> 그룹 내 목표 리스트</h4>
+                    <h4 class="card-title my-2"><i class="fa-solid fa-table-list"></i> 오늘의 목표 리스트</h4>
                 </div>
                 <div class="card-body">
                     <div class="row">

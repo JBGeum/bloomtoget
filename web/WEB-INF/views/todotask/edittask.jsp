@@ -28,8 +28,6 @@
     </script>
 </head>
 <body>
-현재 유저 : ${sessionScope.userNo}
-
 <c:import url="/resource/import/nav.jsp" />
 <div class="container-fluid custom-contents">
     <c:import url="/resource/import/subnav.jsp">
