@@ -6,7 +6,7 @@ Bloomtoget은 그룹과 함께 Todo 목표 달성을 체크할 수 있는 서비
 - IntelliJ
 
 
-![ERD](https://imgur.com/lcpGmjA) 
+![ERD](https://imgur.com/lcpGmjA.png) 
 
 ## 현재 기능
 - 회원 가입 후 프로필 사진 업로드
@@ -18,13 +18,13 @@ Bloomtoget은 그룹과 함께 Todo 목표 달성을 체크할 수 있는 서비
 - 같은 목표에 참여 중인 인원 중 몇 명이 달성했는지 확인
 
 
-![Group](https://imgur.com/cnOnCx6)
+![Group](https://imgur.com/cnOnCx6.png)
 ### 내 그룹 
 
-![Grouplist](https://imgur.com/a4ScAZM)
+![Grouplist](https://imgur.com/a4ScAZM.png)
 ### 그룹 목표
 
-![Todo](https://imgur.com/cIuMxc9)
+![Todo](https://imgur.com/cIuMxc9.png)
 ### 목표 화면
 
 ## 추가 예정 기능
