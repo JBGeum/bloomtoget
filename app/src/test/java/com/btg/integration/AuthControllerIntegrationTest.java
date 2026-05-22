@@ -24,7 +24,7 @@ class AuthControllerIntegrationTest extends IntegrationTestBase {
             1L,
             "test@example.com",
             "Test User",
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(signupUseCase.signup(any())).thenReturn(userResult);
 
@@ -43,7 +43,7 @@ class AuthControllerIntegrationTest extends IntegrationTestBase {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.email").value("test@example.com"))
             .andExpect(jsonPath("$.name").value("Test User"))
-            .andExpect(jsonPath("$.createdAt").value("2025-01-01T00:00:00"));
+            .andExpect(jsonPath("$.createdAt").value(1735689600000L));
     }
 
     @Test
@@ -88,7 +88,7 @@ class AuthControllerIntegrationTest extends IntegrationTestBase {
             1L,
             "test@example.com",
             "Test User",
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         var loginResult = new LoginUseCase.LoginResult(
             "dummy-access-token",

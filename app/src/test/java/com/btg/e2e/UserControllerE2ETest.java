@@ -60,13 +60,12 @@ class UserControllerE2ETest {
 
     @BeforeEach
     void setUp() {
-        // 1. 기존 데이터 정리
         userJpaRepository.deleteAll();
 
-        // 2. H2 AUTO_INCREMENT 초기화 (ID를 1부터 시작)
+        // H2 AUTO_INCREMENT 초기화 (ID를 1부터 시작)
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN id RESTART WITH 1");
 
-        // 3. 테스트 사용자 생성 (이제 ID=1로 저장됨)
+
         testUser = new UserJpaEntity(
                 "testuser@example.com",
                 passwordEncoder.encode("password123"),
@@ -74,9 +73,6 @@ class UserControllerE2ETest {
         );
         testUser = userJpaRepository.save(testUser);
 
-        // 4. 디버깅: 실제 저장된 ID 확인
-        System.out.println("✅ Test user created with ID: " + testUser.getId());
-        System.out.println("✅ User count in DB: " + userJpaRepository.count());
     }
 
     @Test
@@ -114,7 +110,7 @@ class UserControllerE2ETest {
         assertThat(response.getBody()).contains("Updated Name");
         assertThat(response.getBody()).contains("testuser@example.com");
 
-        // Verify database was updated
+
         var updatedUser = userJpaRepository.findById(testUser.getId());
         assertThat(updatedUser).isPresent();
         assertThat(updatedUser.get().getName()).isEqualTo("Updated Name");
@@ -143,14 +139,12 @@ class UserControllerE2ETest {
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        // Verify password was updated and encrypted
         var updatedUser = userJpaRepository.findById(testUser.getId());
         assertThat(updatedUser).isPresent();
         assertThat(updatedUser.get().getPassword()).isNotEqualTo(originalPasswordHash);
         assertThat(updatedUser.get().getPassword()).isNotEqualTo("newPassword456"); // Should be encrypted
         assertThat(updatedUser.get().getPassword()).startsWith("$2a$"); // BCrypt prefix
 
-        // Verify new password works
         assertThat(passwordEncoder.matches("newPassword456", updatedUser.get().getPassword())).isTrue();
     }
 
@@ -176,7 +170,7 @@ class UserControllerE2ETest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).contains("Completely New Name");
 
-        // Verify both name and password were updated
+
         var updatedUser = userJpaRepository.findById(testUser.getId());
         assertThat(updatedUser).isPresent();
         assertThat(updatedUser.get().getName()).isEqualTo("Completely New Name");
