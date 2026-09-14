@@ -3,7 +3,6 @@
 # ===================================================================
 .gradle
 build/
-!gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 .kotlin
@@ -113,6 +112,7 @@ bin/
 
 # Package Files
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -138,8 +138,5 @@ replay_pid*
 **/application-dev.yml
 **/application-*.yml
 !**/application-*.yml.example
+!**/src/test/resources/application-*.yml
 # ===================================================================
-
-/docs/
-*.md
-**/.docker/
