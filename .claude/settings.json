@@ -1,4 +1,5 @@
 {
+  "autoMemoryDirectory": "~/.claude/memory/bloomtoget",
   "hooks": {
     "PreToolUse": [
       {
