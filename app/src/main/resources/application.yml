@@ -81,6 +81,6 @@ springdoc:
 
 
 jwt:
-  secret: dev-secret-key-for-jwt-token-generation-minimum-256-bits-required-for-hs256-algorithm-do-not-use-in-production
+  secret: ${JWT_SECRET}
   access-token-validity-in-seconds: 3600      # 1 hour
   refresh-token-validity-in-seconds: 604800   # 7 days
