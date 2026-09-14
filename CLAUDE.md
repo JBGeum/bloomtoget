@@ -287,7 +287,3 @@ Testing:
   - Integration: MockMvc + mocked Use Cases
   - Unit: Pure logic + mocked Ports
 ```
-
----
-
-**Related Docs**: `C:\CCChat\hexagonal-architecture\e2e-integration-test-circular-dependency-resolution.md`
