@@ -26,7 +26,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
             1L,
             "test@example.com",
             "Test User",
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(getUserProfileUseCase.getUserProfile(eq(1L))).thenReturn(userProfile);
 
@@ -37,7 +37,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.email").value("test@example.com"))
             .andExpect(jsonPath("$.name").value("Test User"))
-            .andExpect(jsonPath("$.createdAt").value("2025-01-01T00:00:00"));
+            .andExpect(jsonPath("$.createdAt").value(1735689600000L));
     }
 
     @Test
@@ -48,7 +48,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
             1L,
             "test@example.com",
             "Updated Name",
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(updateUserProfileUseCase.updateUserProfile(any())).thenReturn(updatedProfile);
 
@@ -65,7 +65,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.email").value("test@example.com"))
             .andExpect(jsonPath("$.name").value("Updated Name"))
-            .andExpect(jsonPath("$.createdAt").value("2025-01-01T00:00:00"));
+            .andExpect(jsonPath("$.createdAt").value(1735689600000L));
     }
 
     @Test
@@ -76,7 +76,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
             1L,
             "test@example.com",
             "Updated Name",
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(updateUserProfileUseCase.updateUserProfile(any())).thenReturn(updatedProfile);
 
@@ -134,7 +134,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
             1L,
             "test@example.com",
             "Test User",
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(updateUserProfileUseCase.updateUserProfile(any())).thenReturn(updatedProfile);
 

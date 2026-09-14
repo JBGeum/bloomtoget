@@ -32,7 +32,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             1,
             10,
             userInfo,
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(createGroupUseCase.createGroup(any())).thenReturn(groupResult);
 
@@ -56,7 +56,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             .andExpect(jsonPath("$.createdBy.id").value(1))
             .andExpect(jsonPath("$.createdBy.email").value("test@example.com"))
             .andExpect(jsonPath("$.createdBy.name").value("Test User"))
-            .andExpect(jsonPath("$.createdAt").value("2025-01-01T00:00:00"));
+            .andExpect(jsonPath("$.createdAt").value(1735689600000L));
     }
 
     @Test
@@ -99,10 +99,10 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             1L, "test@example.com", "Test User"
         );
         ListGroupsUseCase.GroupSummary group1 = new ListGroupsUseCase.GroupSummary(
-            1L, "Group 1", "Description 1", 5, 10, userInfo, "2025-01-01T00:00:00"
+            1L, "Group 1", "Description 1", 5, 10, userInfo, 1735689600000L
         );
         ListGroupsUseCase.GroupSummary group2 = new ListGroupsUseCase.GroupSummary(
-            2L, "Group 2", "Description 2", 3, 20, userInfo, "2025-01-02T00:00:00"
+            2L, "Group 2", "Description 2", 3, 20, userInfo, 1735776000000L
         );
         ListGroupsUseCase.PagedGroupResult pagedResult = new ListGroupsUseCase.PagedGroupResult(
             List.of(group1, group2),
@@ -145,7 +145,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             5,
             10,
             userInfo,
-            "2025-01-01T00:00:00",
+            1735689600000L,
             "MEMBER",
             3
         );
@@ -163,7 +163,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             .andExpect(jsonPath("$.myRole").value("MEMBER"))
             .andExpect(jsonPath("$.taskCount").value(3))
             .andExpect(jsonPath("$.createdBy.id").value(1))
-            .andExpect(jsonPath("$.createdAt").value("2025-01-01T00:00:00"));
+            .andExpect(jsonPath("$.createdAt").value(1735689600000L));
     }
 
     @Test
@@ -180,7 +180,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             5,
             15,
             userInfo,
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(updateGroupUseCase.updateGroup(any())).thenReturn(groupResult);
 
@@ -240,7 +240,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             1L,
             userInfo,
             "MEMBER",
-            "2025-01-01T00:00:00"
+            1735689600000L
         );
         when(joinGroupUseCase.joinGroup(any())).thenReturn(groupMemberResult);
 
@@ -253,6 +253,6 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
             .andExpect(jsonPath("$.user.email").value("test@example.com"))
             .andExpect(jsonPath("$.user.name").value("Test User"))
             .andExpect(jsonPath("$.role").value("MEMBER"))
-            .andExpect(jsonPath("$.joinedAt").value("2025-01-01T00:00:00"));
+            .andExpect(jsonPath("$.joinedAt").value(1735689600000L));
     }
 }

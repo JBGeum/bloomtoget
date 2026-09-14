@@ -53,7 +53,7 @@ class SignupServiceTest {
                 1L,
                 "test@example.com",
                 "Test User",
-                "2025-11-05T10:00:00"
+                1730797200000L
         );
         given(saveUserPort.save("test@example.com", "$2a$10$encodedPassword", "Test User"))
                 .willReturn(savedUser);
@@ -66,7 +66,7 @@ class SignupServiceTest {
         assertThat(result.id()).isEqualTo(1L);
         assertThat(result.email()).isEqualTo("test@example.com");
         assertThat(result.name()).isEqualTo("Test User");
-        assertThat(result.createdAt()).isEqualTo("2025-11-05T10:00:00");
+        assertThat(result.createdAt()).isEqualTo(1730797200000L);
 
         then(loadUserPort).should().existsByEmail("test@example.com");
         then(encodePasswordPort).should().encode("password123");
@@ -115,7 +115,7 @@ class SignupServiceTest {
                 2L,
                 "security@example.com",
                 "Security User",
-                "2025-11-05T11:00:00"
+                1730800800000L
         );
         given(saveUserPort.save(anyString(), anyString(), anyString())).willReturn(savedUser);
 
@@ -148,7 +148,7 @@ class SignupServiceTest {
                 3L,
                 "complete@example.com",
                 "Complete User",
-                "2025-11-05T12:00:00"
+                1730804400000L
         );
         given(saveUserPort.save("complete@example.com", "encoded999", "Complete User"))
                 .willReturn(savedUser);

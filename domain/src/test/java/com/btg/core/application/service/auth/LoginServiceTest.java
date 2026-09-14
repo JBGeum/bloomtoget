@@ -61,7 +61,7 @@ class LoginServiceTest {
                 "test@example.com",
                 "$2a$10$encodedPassword",
                 "Test User",
-                "2025-11-05T10:00:00"
+                1730797200000L
         );
         given(loadUserPort.loadByEmail("test@example.com")).willReturn(Optional.of(user));
         given(encodePasswordPort.matches("password123", "$2a$10$encodedPassword")).willReturn(true);
@@ -129,7 +129,7 @@ class LoginServiceTest {
                 "test@example.com",
                 "$2a$10$encodedPassword",
                 "Test User",
-                "2025-11-05T10:00:00"
+                1730797200000L
         );
         given(loadUserPort.loadByEmail("test@example.com")).willReturn(Optional.of(user));
         given(encodePasswordPort.matches("wrongPassword", "$2a$10$encodedPassword")).willReturn(false);
@@ -159,7 +159,7 @@ class LoginServiceTest {
                 "test@example.com",
                 "$2a$10$encodedPassword",
                 "Test User",
-                "2025-11-05T10:00:00"
+                1730797200000L
         );
         given(loadUserPort.loadByEmail(anyString())).willReturn(Optional.of(user));
         given(encodePasswordPort.matches(anyString(), anyString())).willReturn(true);
@@ -192,7 +192,7 @@ class LoginServiceTest {
                 "test@example.com",
                 "$2a$10$encodedPassword",
                 "Test User",
-                "2025-11-05T10:00:00"
+                1730797200000L
         );
         given(loadUserPort.loadByEmail(anyString())).willReturn(Optional.of(user));
         given(encodePasswordPort.matches(anyString(), anyString())).willReturn(true);
@@ -226,7 +226,7 @@ class LoginServiceTest {
                 "complete@example.com",
                 "$2a$10$hash",
                 "Complete User",
-                "2025-11-05T15:30:00"
+                1730817000000L
         );
         given(loadUserPort.loadByEmail("complete@example.com")).willReturn(Optional.of(user));
         given(encodePasswordPort.matches("password999", "$2a$10$hash")).willReturn(true);
@@ -247,7 +247,7 @@ class LoginServiceTest {
         assertThat(result.user().id()).isEqualTo(99L);
         assertThat(result.user().email()).isEqualTo("complete@example.com");
         assertThat(result.user().name()).isEqualTo("Complete User");
-        assertThat(result.user().createdAt()).isEqualTo("2025-11-05T15:30:00");
+        assertThat(result.user().createdAt()).isEqualTo(1730817000000L);
     }
 
     @Test
@@ -264,7 +264,7 @@ class LoginServiceTest {
                 "order@example.com",
                 "$2a$10$hash",
                 "Order User",
-                "2025-11-05T10:00:00"
+                1730797200000L
         );
         given(loadUserPort.loadByEmail(anyString())).willReturn(Optional.of(user));
         given(encodePasswordPort.matches(anyString(), anyString())).willReturn(true);
