@@ -30,7 +30,7 @@
 | Java 21 toolchain 전환, CI(build + test) | 위임 |
 | README를 코드 기준 사실로 교정 | 위임 후 검토 |
 | 컨트롤러 테스트 37건의 401 실패 해소(테스트에서 인증을 다루는 방식 결정) | 직접 |
-| 멘토 리뷰 미해결 2건 이슈 등록: PR #4 응답에 password가 없음을 검증, PR #6 그룹 검색 쿼리 수 | 직접 |
+| 멘토 리뷰 미해결 2건 이슈 등록: [f-lab-edu#4](https://github.com/f-lab-edu/bloomtoget/pull/4) 응답에 password가 없음을 검증, [f-lab-edu#6](https://github.com/f-lab-edu/bloomtoget/pull/6) 그룹 검색 쿼리 수 | 직접 |
 
 완료 기준: 클린 클론에서 `./gradlew build`가 통과하고 CI가 녹색이다.
 

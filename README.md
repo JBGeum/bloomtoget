@@ -23,7 +23,7 @@ bloomtoget은 혼자서는 지속하기 어려운 계획 및 목표 달성 과�
 
 그룹에 참여한 멤버들이 같은 목표를 공유하고, 매일 달성 여부를 체크하면서 서로의 진행 상황을 확인할 수 있습니다. 몇 명이 오늘 목표를 달성했는지 실시간으로 볼 수 있어 자연스러운 동기부여가 됩니다.
 
-> 이 프로젝트는 [구 버전(Java 8 + Spring MVC + MyBatis)](https://github.com/JBGeum/bloomtoget)을 Java 21 + Spring Boot 3 + 헥사고날 아키텍처로 전면 재설계한 버전입니다.
+> 이 프로젝트는 [구 버전(Java 8 + Spring MVC + MyBatis)](https://github.com/JBGeum/bloomtoget-legacy)을 Java 21 + Spring Boot 3 + 헥사고날 아키텍처로 전면 재설계한 버전입니다.
 
 ---
 
