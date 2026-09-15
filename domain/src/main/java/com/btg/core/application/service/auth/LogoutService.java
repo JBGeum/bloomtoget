@@ -17,7 +17,7 @@ public class LogoutService implements LogoutUseCase {
 
     @Override
     public void logout(LogoutCommand command) {
-        if (!generateTokenPort.validateToken(command.refreshToken())) {
+        if (!generateTokenPort.validateRefreshToken(command.refreshToken())) {
             throw new IllegalArgumentException("refresh token이 유효하지 않습니다");
         }
 

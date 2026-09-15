@@ -8,7 +8,7 @@ public interface GenerateTokenPort {
 
     String generateRefreshToken(Long userId);
 
-    boolean validateToken(String token);
+    boolean validateRefreshToken(String token);
 
     Long getUserIdFromToken(String token);
 

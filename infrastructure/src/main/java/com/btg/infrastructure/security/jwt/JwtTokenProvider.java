@@ -57,13 +57,22 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateAccessToken(String token) {
+        return hasType(token, "access");
+    }
+
+    public boolean validateRefreshToken(String token) {
+        return hasType(token, "refresh");
+    }
+
+    private boolean hasType(String token, String type) {
         try {
-            Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(token);
-            return true;
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return type.equals(claims.get("type", String.class));
         } catch (Exception e) {
             return false;
         }

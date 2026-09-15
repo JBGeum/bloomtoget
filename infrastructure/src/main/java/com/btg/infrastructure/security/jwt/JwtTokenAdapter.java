@@ -23,8 +23,8 @@ public class JwtTokenAdapter implements GenerateTokenPort {
     }
 
     @Override
-    public boolean validateToken(String token) {
-        return jwtTokenProvider.validateToken(token);
+    public boolean validateRefreshToken(String token) {
+        return jwtTokenProvider.validateRefreshToken(token);
     }
 
     @Override

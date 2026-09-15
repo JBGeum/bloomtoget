@@ -21,7 +21,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 
     @Override
     public TokenResult refreshToken(RefreshTokenCommand command) {
-        if (!generateTokenPort.validateToken(command.refreshToken())) {
+        if (!generateTokenPort.validateRefreshToken(command.refreshToken())) {
             throw new IllegalArgumentException("refresh token이 유효하지 않습니다");
         }
 
