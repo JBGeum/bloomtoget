@@ -43,6 +43,25 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
+    @DisplayName("GET /users/me - Unauthorized (Refresh Token)")
+    void getMyProfile_Unauthorized_RefreshToken() throws Exception {
+        // Given
+        var userProfile = new GetUserProfileUseCase.UserProfileResult(
+                1L,
+                "test@example.com",
+                "Test User",
+                1735689600000L
+        );
+        when(getUserProfileUseCase.getUserProfile(eq(1L))).thenReturn(userProfile);
+
+        // When & Then
+        mockMvc.perform(get("/users/me")
+                        .header(HttpHeaders.AUTHORIZATION, refreshBearerToken(1L)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("PUT /users/me - Success (Update Name Only)")
     void updateMyProfile_Success_NameOnly() throws Exception {
         // Given

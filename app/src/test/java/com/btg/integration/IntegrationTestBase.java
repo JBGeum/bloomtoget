@@ -98,4 +98,8 @@ public abstract class IntegrationTestBase {
     protected String bearerToken(Long userId) {
         return "Bearer " + jwtTokenProvider.generateAccessToken(userId, "test@example.com");
     }
+
+    protected String refreshBearerToken(Long userId) {
+        return "Bearer " + jwtTokenProvider.generateRefreshToken(userId);
+    }
 }

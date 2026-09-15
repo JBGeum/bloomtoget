@@ -44,3 +44,30 @@
 - 막힌 곳 / 다음에 볼 것:
   - 각 방식의 장단점을 비교하고 한 가지로 정하는 데서 실무 감각이 부족함을 느꼈고, 결정에 어려움이 있었다.
   - 테스트 환경 구성에 익숙하지 않아서 다양한 방식으로 테스트를 구현하는 배경 지식을 갖춰야 할 필요가 있을 것 같다.
+
+## [#19] refresh 토큰이 access 토큰으로 통과하는 결함 수정 (2026-09-15)
+
+- 문제: refresh 토큰으로 `GET /users/me`를 요청하면 200이 응답됨.
+  - 재현 테스트 `getMyProfile_Unauthorized_RefreshToken`: `Status expected:<401> but was:<200>` (`./gradlew :app:test --tests "com.btg.integration.UserControllerIntegrationTest"`)
+- 가설: 인증 필터의 `validateToken`이 서명만 확인하고 토큰 종류(`type` claim)를 보지 않는다.
+- 원인:
+  - `validateToken` 하나를 요청 인증(access용)과 `RefreshTokenService`·`LogoutService`(refresh용)가 함께 써서, 어느 쪽도 토큰 종류를 확인하지 않았다.
+  - 재현 테스트는 기존 성공 테스트와 토큰만 다르게 두어, 200이 곧 "refresh 토큰으로 인증이 통과했다"는 증거가 되게 했다.
+- 결정과 근거: 토큰 종류별로 서로 배타적인 검증 메서드를 둔다. 요청 인증은 access만, refresh·로그아웃은 refresh만 받는다.
+  - RFC 8725 §3.12: 같은 발급자의 여러 종류 JWT는 검증 규칙이 서로 배타적이어야 한다(MUST). 그중 "claim 값을 다르게 둔다" 전략을 썼다.
+  - 범용 `validateToken`을 지워 잘못 쓸 메서드가 남지 않게 했다.
+  - 재현 테스트는 HTTP 동작을 검사하므로 수정 방식과 무관하게 유지된다.
+- 버린 대안과 이유:
+  - `validateToken`에 access 확인만 추가: refresh·로그아웃이 refresh 토큰을 거절하게 되어 깨진다.
+  - 서명 키 분리: RFC가 인정하는 전략이지만 검증 분리는 여전히 필요하고, 두 시크릿을 같은 값으로 잘못 설정하면 보호가 조용히 사라진다. 유출 피해 범위·독립 교체 같은 이점은 배포가 없는 지금은 드러나지 않아, 키 관리가 필요해질 때 다시 본다.
+- 한 일:
+  - `IntegrationTestBase`에 `refreshBearerToken` 헬퍼와 재현 테스트 추가.
+  - `JwtTokenProvider`에 `validateAccessToken`·`validateRefreshToken`(type 확인)을 두고 `validateToken` 삭제.
+  - 필터는 access 검증으로, `GenerateTokenPort`·`JwtTokenAdapter`·`RefreshTokenService`·`LogoutService`는 refresh 검증으로 교체.
+- 결과:
+  - refresh 토큰 요청: 200 → 401. 전체 테스트 55건 통과.
+  - 반대 방향(access 토큰을 refresh에 사용)은 수정 전에도 저장된 refresh 토큰 조회에서 막혀 실제 피해는 없었다.
+- 막힌 곳 / 다음에 볼 것:
+  - 새 테스트 대신 기존 PUT 테스트의 기대값을 바꿔, 그 실패를 재현으로 착각했다. 실패를 보면 어느 테스트가 실패했는지부터 확인한다.
+  - "엄격함"을 키 분리로만 생각했는데, 핵심은 검증 규칙이 서로 배타적인가였다.
+  - 토큰 종류를 `type` claim 대신 `typ` 헤더로 명시하는 방식(RFC 8725 §3.11 권장).  
