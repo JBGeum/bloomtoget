@@ -30,7 +30,7 @@
 | Java 21 toolchain 전환, CI(build + test) | 위임 |
 | README를 코드 기준 사실로 교정 | 위임 후 검토 |
 | 컨트롤러 테스트 37건의 401 실패 해소(테스트에서 인증을 다루는 방식 결정) | 직접 |
-| 멘토 리뷰 미해결 2건 이슈 등록: [f-lab-edu#4](https://github.com/f-lab-edu/bloomtoget/pull/4) 응답에 password가 없음을 검증, [f-lab-edu#6](https://github.com/f-lab-edu/bloomtoget/pull/6) 그룹 검색 쿼리 수 | 직접 |
+| 멘토 리뷰 미해결 지적 정리: [f-lab-edu#4](https://github.com/f-lab-edu/bloomtoget/pull/4) 회원가입 응답에 password가 없음을 검증, [f-lab-edu#6](https://github.com/f-lab-edu/bloomtoget/pull/6) 그룹 검색 쿼리 수는 4단계로 이동 | 직접 |
 
 완료 기준: 클린 클론에서 `./gradlew build`가 통과하고 CI가 녹색이다.
 
@@ -75,7 +75,7 @@
 |---|---|
 | k6 부하 스크립트 골격 | 위임 |
 | `GetTaskService` 비교: 현재 병렬 조회(CompletableFuture) / 트랜잭션 안 순차 조회 / 집계 쿼리. 동시 요청 1·5·10·20에서 p50·p99, 타임아웃율, 커넥션 대기 | 직접 |
-| 태스크 목록 N+1 제거, 쿼리 수 전후 비교(`generate_statistics`) | 직접 |
+| 태스크 목록·그룹 검색 N+1 제거, 쿼리 수 전후 비교(`generate_statistics`) | 직접 |
 | `docs/adr/ADR-002` | 직접 |
 
 완료 기준: 수치 표 2개와 선택 근거가 ADR로 남는다.

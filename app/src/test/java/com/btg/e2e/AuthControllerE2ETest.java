@@ -82,6 +82,9 @@ class AuthControllerE2ETest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).contains("newuser@example.com");
         assertThat(response.getBody()).contains("New User");
+        assertThat(response.getBody()).doesNotContain("\"password\":");
+        assertThat(response.getBody()).doesNotContain("securePassword123");
+        assertThat(response.getBody()).doesNotContain("$2a$");
 
         // Verify database persistence
         var savedUser = userJpaRepository.findByEmail("newuser@example.com");
