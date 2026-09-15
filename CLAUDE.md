@@ -2,7 +2,7 @@
 
 > **Purpose**: Quick reference for Claude Code to understand project structure, patterns, and preferences
 
-**Last Updated**: 2026-09-14
+**Last Updated**: 2026-09-15
 **Architecture**: Hexagonal (Ports & Adapters) + Multi-Module
 **Language**: Java 21 + Spring Boot 3.5.6
 **Build**: Gradle with Convention Plugins
@@ -17,6 +17,14 @@
 2. **Module Isolation**: `domain` MUST NOT depend on `infrastructure`
 3. **Abstraction Boundary**: All external systems accessed via Ports
 4. **Compile-Time Enforcement**: Gradle dependencies enforce architecture
+
+---
+
+## 🧭 작업 안내 방식
+
+- 작업할 때 무엇을 왜 하는지 짧게 설명한다. 다른 방식과 무엇이 다른지를 이 저장소의 실제 상황을 예로 든다.
+- 다음 할 일은 한 번에 한 단계만 제안하고, 확인을 받은 뒤 진행한다. 여러 단계를 한꺼번에 실행하거나 나열하지 않는다.
+- 이슈 하나 분량의 작업이 끝나면 PR을 올릴 때라고 먼저 알린다. 이슈 1개 = 브랜치 1개 = PR 1개.
 
 ---
 
