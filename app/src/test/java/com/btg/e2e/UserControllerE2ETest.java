@@ -6,6 +6,7 @@ import com.btg.core.application.port.in.group.*;
 import com.btg.core.application.port.in.task.*;
 import com.btg.infrastructure.persistence.user.entity.UserJpaEntity;
 import com.btg.infrastructure.persistence.user.repository.UserJpaRepository;
+import com.btg.infrastructure.security.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ class UserControllerE2ETest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     @MockBean private GetDailyProgressUseCase getDailyProgressUseCase;
     @MockBean private UpdateDailyProgressUseCase updateDailyProgressUseCase;
     @MockBean private CreateTaskUseCase createTaskUseCase;
@@ -57,6 +61,7 @@ class UserControllerE2ETest {
     @MockBean private JoinGroupUseCase joinGroupUseCase;
 
     private UserJpaEntity testUser;
+    private String accessToken;
 
     @BeforeEach
     void setUp() {
@@ -72,6 +77,7 @@ class UserControllerE2ETest {
                 "Test User"
         );
         testUser = userJpaRepository.save(testUser);
+        accessToken = jwtTokenProvider.generateAccessToken(testUser.getId(), testUser.getEmail());
 
     }
 
@@ -79,7 +85,9 @@ class UserControllerE2ETest {
     @DisplayName("GET /users/me - Success with real database")
     void getMyProfile_Success_WithRealDatabase() {
         // When
-        var response = restTemplate.getForEntity("/users/me", String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        var response = restTemplate.exchange("/users/me", HttpMethod.GET, new HttpEntity<>(headers), String.class);
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -100,6 +108,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         // When
@@ -129,6 +138,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         String originalPasswordHash = testUser.getPassword();
@@ -161,6 +171,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         // When
@@ -185,6 +196,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         String originalName = testUser.getName();
@@ -215,6 +227,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         // When
@@ -242,6 +255,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         // When
@@ -263,6 +277,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         // When
@@ -290,6 +305,7 @@ class UserControllerE2ETest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
         // When
@@ -303,7 +319,9 @@ class UserControllerE2ETest {
     @DisplayName("GET /users/me - Returns correct data structure")
     void getMyProfile_CorrectDataStructure() {
         // When
-        var response = restTemplate.getForEntity("/users/me", String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        var response = restTemplate.exchange("/users/me", HttpMethod.GET, new HttpEntity<>(headers), String.class);
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

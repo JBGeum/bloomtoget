@@ -3,6 +3,7 @@ package com.btg.integration;
 import com.btg.core.application.port.in.group.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.util.List;
@@ -38,6 +39,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(post("/groups")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -64,6 +66,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
     void createGroup_ValidationError_ShortName() throws Exception {
         // When & Then
         mockMvc.perform(post("/groups")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -80,6 +83,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
     void createGroup_ValidationError_LongDescription() throws Exception {
         // When & Then
         mockMvc.perform(post("/groups")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -115,6 +119,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(get("/groups")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .param("type", "MY")
                 .param("page", "0")
                 .param("size", "20"))
@@ -186,6 +191,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(put("/groups/1")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -207,6 +213,7 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
     void updateGroup_ValidationError_ShortName() throws Exception {
         // When & Then
         mockMvc.perform(put("/groups/1")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -224,7 +231,8 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
         doNothing().when(deleteGroupUseCase).deleteGroup(any());
 
         // When & Then
-        mockMvc.perform(delete("/groups/1"))
+        mockMvc.perform(delete("/groups/1")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L)))
             .andDo(print())
             .andExpect(status().isNoContent());
     }
@@ -245,7 +253,8 @@ class GroupControllerIntegrationTest extends IntegrationTestBase {
         when(joinGroupUseCase.joinGroup(any())).thenReturn(groupMemberResult);
 
         // When & Then
-        mockMvc.perform(post("/groups/1/members"))
+        mockMvc.perform(post("/groups/1/members")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L)))
             .andDo(print())
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").value(1))

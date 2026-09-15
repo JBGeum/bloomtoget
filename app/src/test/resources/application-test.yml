@@ -15,10 +15,6 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
 
-  # Disable security for testing
-  security:
-    enabled: false
-
 # JWT Configuration for testing
 jwt:
   secret: test-secret-key-for-jwt-token-generation-minimum-256-bits-required-for-hs256-algorithm

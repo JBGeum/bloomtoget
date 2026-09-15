@@ -5,6 +5,7 @@ import com.btg.core.application.port.in.dailyprogress.*;
 import com.btg.core.application.port.in.group.*;
 import com.btg.core.application.port.in.task.*;
 import com.btg.core.application.port.in.user.*;
+import com.btg.infrastructure.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
  * - Loads full Spring application context
  * - Provides MockMvc for HTTP request testing
  * - Uses test profile
- * - Security disabled for testing
  * - All Use Cases are mocked (no real implementation needed)
  */
 @SpringBootTest
@@ -91,4 +91,11 @@ public abstract class IntegrationTestBase {
 
     @MockitoBean
     protected UpdateDailyProgressUseCase updateDailyProgressUseCase;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    protected String bearerToken(Long userId) {
+        return "Bearer " + jwtTokenProvider.generateAccessToken(userId, "test@example.com");
+    }
 }

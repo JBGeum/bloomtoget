@@ -4,6 +4,7 @@ import com.btg.core.application.port.in.user.GetUserProfileUseCase;
 import com.btg.core.application.port.in.user.UpdateUserProfileUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -31,7 +32,8 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
         when(getUserProfileUseCase.getUserProfile(eq(1L))).thenReturn(userProfile);
 
         // When & Then
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/users/me")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1))
@@ -54,6 +56,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(put("/users/me")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -82,6 +85,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(put("/users/me")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -100,6 +104,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
     void updateMyProfile_ValidationError_ShortName() throws Exception {
         // When & Then
         mockMvc.perform(put("/users/me")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -115,6 +120,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
     void updateMyProfile_ValidationError_ShortPassword() throws Exception {
         // When & Then
         mockMvc.perform(put("/users/me")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -140,6 +146,7 @@ class UserControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(put("/users/me")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
             .andDo(print())
