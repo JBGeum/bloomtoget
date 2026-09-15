@@ -4,6 +4,7 @@ import com.btg.core.application.port.in.dailyprogress.GetDailyProgressUseCase;
 import com.btg.core.application.port.in.dailyprogress.UpdateDailyProgressUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.util.List;
@@ -39,7 +40,8 @@ class DailyProgressControllerIntegrationTest extends IntegrationTestBase {
         when(getDailyProgressUseCase.getDailyProgressSummary(1L)).thenReturn(summaryResult);
 
         // When & Then
-        mockMvc.perform(get("/tasks/1/daily-progress"))
+        mockMvc.perform(get("/tasks/1/daily-progress")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.taskId").value(1))
@@ -77,7 +79,8 @@ class DailyProgressControllerIntegrationTest extends IntegrationTestBase {
         when(getDailyProgressUseCase.getMyDailyProgress(eq(1L), any())).thenReturn(myProgressResult);
 
         // When & Then
-        mockMvc.perform(get("/tasks/1/daily-progress/me"))
+        mockMvc.perform(get("/tasks/1/daily-progress/me")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.taskId").value(1))
@@ -108,6 +111,7 @@ class DailyProgressControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(patch("/tasks/1/daily-progress/2025-02-01")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -135,6 +139,7 @@ class DailyProgressControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(patch("/tasks/1/daily-progress/2025-02-01")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -153,6 +158,7 @@ class DailyProgressControllerIntegrationTest extends IntegrationTestBase {
     void updateDailyProgress_ValidationError_MissingCompleted() throws Exception {
         // When & Then
         mockMvc.perform(patch("/tasks/1/daily-progress/2025-02-01")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
             .andDo(print())

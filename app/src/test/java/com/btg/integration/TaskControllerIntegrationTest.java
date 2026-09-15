@@ -3,6 +3,7 @@ package com.btg.integration;
 import com.btg.core.application.port.in.task.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.util.List;
@@ -46,6 +47,7 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(post("/tasks")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -79,6 +81,7 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
     void createTask_ValidationError_ShortTitle() throws Exception {
         // When & Then
         mockMvc.perform(post("/tasks")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -97,6 +100,7 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
     void createTask_ValidationError_MissingStartDate() throws Exception {
         // When & Then
         mockMvc.perform(post("/tasks")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -137,6 +141,7 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(get("/tasks")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .param("status", "ALL")
                 .param("page", "0")
                 .param("size", "20"))
@@ -181,7 +186,8 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
         when(getTaskUseCase.getTask(eq(1L), any())).thenReturn(taskDetailResult);
 
         // When & Then
-        mockMvc.perform(get("/tasks/1"))
+        mockMvc.perform(get("/tasks/1")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1))
@@ -226,6 +232,7 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
 
         // When & Then
         mockMvc.perform(put("/tasks/1")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -247,6 +254,7 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
     void updateTask_ValidationError_LongDescription() throws Exception {
         // When & Then
         mockMvc.perform(put("/tasks/1")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -265,7 +273,8 @@ class TaskControllerIntegrationTest extends IntegrationTestBase {
         doNothing().when(deleteTaskUseCase).deleteTask(any());
 
         // When & Then
-        mockMvc.perform(delete("/tasks/1"))
+        mockMvc.perform(delete("/tasks/1")
+                .header(HttpHeaders.AUTHORIZATION, bearerToken(1L)))
             .andDo(print())
             .andExpect(status().isNoContent());
     }
