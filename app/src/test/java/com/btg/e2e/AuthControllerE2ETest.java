@@ -17,11 +17,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -287,6 +290,97 @@ class AuthControllerE2ETest {
     }
 
     @Test
+    @DisplayName("POST /auth/logout - 방침: 이미 발급된 access 토큰은 만료까지 유효하다")
+    void logout_AccessTokenRemainsValid() {
+        // Given: Signup and login
+        String signupRequest = """
+            {
+                "email": "logout-access@example.com",
+                "password": "password123",
+                "name": "Logout Access User"
+            }
+            """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        restTemplate.postForEntity("/auth/signup", new HttpEntity<>(signupRequest, headers), String.class);
+
+        String loginRequest = """
+            {
+                "email": "logout-access@example.com",
+                "password": "password123"
+            }
+            """;
+
+        var loginResponse = restTemplate.postForEntity("/auth/login", new HttpEntity<>(loginRequest, headers), String.class);
+        String accessToken = extractAccessToken(loginResponse.getBody());
+        String refreshToken = extractRefreshToken(loginResponse.getBody());
+
+        when(getUserProfileUseCase.getUserProfile(anyLong())).thenReturn(
+            new GetUserProfileUseCase.UserProfileResult(1L, "logout-access@example.com", "Logout Access User", 0L));
+
+        // When: Logout
+        String logoutRequest = String.format("""
+            {
+                "refreshToken": "%s"
+            }
+            """, refreshToken);
+
+        var logoutResponse = restTemplate.postForEntity("/auth/logout", new HttpEntity<>(logoutRequest, headers), String.class);
+        assertThat(logoutResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+        // Then: The same access token still authenticates
+        HttpHeaders authHeaders = new HttpHeaders();
+        authHeaders.setBearerAuth(accessToken);
+
+        var response = restTemplate.exchange("/users/me", HttpMethod.GET, new HttpEntity<>(authHeaders), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    @DisplayName("POST /auth/refresh - 로그아웃한 refresh 토큰으로는 갱신되지 않는다")
+    void logout_RefreshTokenRejected() {
+        // Given: Signup and login
+        String signupRequest = """
+            {
+                "email": "logout-refresh@example.com",
+                "password": "password123",
+                "name": "Logout Refresh User"
+            }
+            """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        restTemplate.postForEntity("/auth/signup", new HttpEntity<>(signupRequest, headers), String.class);
+
+        String loginRequest = """
+            {
+                "email": "logout-refresh@example.com",
+                "password": "password123"
+            }
+            """;
+
+        var loginResponse = restTemplate.postForEntity("/auth/login", new HttpEntity<>(loginRequest, headers), String.class);
+        String refreshToken = extractRefreshToken(loginResponse.getBody());
+
+        String tokenRequest = String.format("""
+            {
+                "refreshToken": "%s"
+            }
+            """, refreshToken);
+
+        var logoutResponse = restTemplate.postForEntity("/auth/logout", new HttpEntity<>(tokenRequest, headers), String.class);
+        assertThat(logoutResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+        // When: Refresh with the logged-out token
+        var response = restTemplate.postForEntity("/auth/refresh", new HttpEntity<>(tokenRequest, headers), String.class);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     @DisplayName("POST /auth/signup - Validation error for invalid email")
     void signup_ValidationError_InvalidEmail() {
         // Given
@@ -335,6 +429,13 @@ class AuthControllerE2ETest {
     // Helper method to extract refresh token from JSON response
     private String extractRefreshToken(String jsonResponse) {
         int startIndex = jsonResponse.indexOf("\"refreshToken\":\"") + 16;
+        int endIndex = jsonResponse.indexOf("\"", startIndex);
+        return jsonResponse.substring(startIndex, endIndex);
+    }
+
+    // Helper method to extract access token from JSON response
+    private String extractAccessToken(String jsonResponse) {
+        int startIndex = jsonResponse.indexOf("\"accessToken\":\"") + 15;
         int endIndex = jsonResponse.indexOf("\"", startIndex);
         return jsonResponse.substring(startIndex, endIndex);
     }
