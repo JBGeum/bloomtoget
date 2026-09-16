@@ -82,5 +82,5 @@ springdoc:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-validity-in-seconds: 3600      # 1 hour
+  access-token-validity-in-seconds: 900       # 15 minutes
   refresh-token-validity-in-seconds: 604800   # 7 days
