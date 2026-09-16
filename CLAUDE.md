@@ -189,6 +189,8 @@ public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
 | Integration | HTTP layer | MockMvc, @MockitoBean | Use Cases | Fast | Controller validation |
 | Unit | Business logic | JUnit, Mockito | Ports | Very fast | Service logic |
 
+`@DisplayName`은 한글로 쓴다. 메서드명은 자바 식별자이므로 영어를 유지한다.
+
 **E2E Test Template** (`app/src/test/java/*/e2e/`):
 ```java
 @SpringBootTest(webEnvironment = RANDOM_PORT)
