@@ -2,10 +2,11 @@
 
 > **Purpose**: Quick reference for Claude Code to understand project structure, patterns, and preferences
 
-**Last Updated**: 2026-09-15
+**Last Updated**: 2026-09-16
 **Architecture**: Hexagonal (Ports & Adapters) + Multi-Module
 **Language**: Java 21 + Spring Boot 3.5.6
 **Build**: Gradle with Convention Plugins
+**Database**: PostgreSQL 16 (docker compose) / H2 (test 프로필)
 **Branching**: GitHub Flow (main + 이슈 브랜치). 전역 Git Flow 규칙(develop, release 병합)은 이 저장소에 적용하지 않는다.
 **Response Language**: 한글 (Korean)
 
@@ -20,11 +21,53 @@
 
 ---
 
+## ⚙️ 빌드 · 실행 · 테스트
+
+```bash
+# 로컬 실행 (PostgreSQL 필요)
+docker compose up -d
+cp app/src/main/resources/application-local.yml.example app/src/main/resources/application-local.yml
+./gradlew :app:bootRun
+
+# 테스트 (H2 인메모리, Docker 불필요)
+./gradlew test
+./gradlew :domain:test
+./gradlew :app:test --tests '*AuthControllerE2ETest'
+./gradlew :app:test --tests '*AuthControllerE2ETest.signup_Success_WithDatabasePersistence'
+
+# CI와 동일한 검증
+./gradlew build
+```
+
+`application-local.yml`과 `application-prod.yml`은 `.gitignore`의 `**/application-*.yml`에 걸려 추적되지 않는다. 클론 직후에는 `.example`에서 복사해야 실행된다.
+
+Gradle 실행에는 JDK 17 이상이면 되고, 컴파일용 JDK 21은 toolchain이 내려받는다.
+
+API 문서: http://localhost:8080/swagger-ui.html
+
+---
+
 ## 🧭 작업 안내 방식
 
 - 작업할 때 무엇을 왜 하는지 짧게 설명한다. 다른 방식과 무엇이 다른지를 이 저장소의 실제 상황을 예로 든다.
 - 다음 할 일은 한 번에 한 단계만 제안하고, 확인을 받은 뒤 진행한다. 여러 단계를 한꺼번에 실행하거나 나열하지 않는다.
 - 이슈 하나 분량의 작업이 끝나면 PR을 올릴 때라고 먼저 알리고, 학습 로그 항목을 쓸지 묻는다. 쓰면 같은 PR에 넣는다. 이슈 1개 = 브랜치 1개 = PR 1개.
+
+---
+
+## 📚 저장소의 기록물
+
+| 경로 | 무엇 | 누가 쓰나 |
+|---|---|---|
+| `docs/ROADMAP.md` | 단계별 진행 계획과 작업 우선순위 | 다음 작업을 고를 때 여기부터 본다 |
+| `docs/learning-log.md` | 이슈별 학습 기록 | **사용자만 쓴다. Claude는 Read만 한다** |
+| `docs/openapi/` | API 명세 | |
+
+`.claude/hooks/protect-learning-records.js`가 PreToolUse에서 `docs/learning-log.md`와 `docs/adr/`에 대한 Write·Edit·Bash를 exit 2로 차단한다. 차단되면 훅이 의도대로 동작한 것이므로 우회하지 않는다.
+
+`.claude/agents/interviewer.md`는 변경분을 읽고 기술 면접 질문만 돌려주는 서브에이전트이고, `.claude/skills/session-review/`는 세션 복습 노트를 저장소 밖 학습 자료 저장소에 쓰는 skill이다.
+
+CI는 `.github/workflows/build.yml` 하나이며 main push와 모든 PR에서 `./gradlew build`를 돌린다.
 
 ---
 
@@ -45,40 +88,44 @@ infrastructure:  domain + web + jpa + security + jwt + mapstruct
 app:             domain + infrastructure
 ```
 
-**Key Files**:
-- `domain/port/in/*UseCase.java` - Inbound Ports (Use Cases)
-- `domain/port/out/*Port.java` - Outbound Ports (External systems)
-- `domain/service/*.java` - Business logic (implements Use Cases)
-- `infrastructure/web/*Controller.java` - REST endpoints
-- `infrastructure/persistence/*Adapter.java` - Port implementations
-- `infrastructure/security/jwt/JwtTokenAdapter.java` - JWT wrapper
+**Key Files** (`<도메인>` = `auth` · `user` · `group` · `task` · `dailyprogress`):
+- `domain/src/main/java/com/btg/core/application/port/in/<도메인>/*UseCase.java` - Inbound Ports (Use Cases)
+- `domain/src/main/java/com/btg/core/application/port/out/<도메인>/*Port.java` - Outbound Ports (External systems)
+- `domain/src/main/java/com/btg/core/application/service/<도메인>/*Service.java` - Business logic (implements Use Cases)
+- `infrastructure/src/main/java/com/btg/infrastructure/web/<도메인>/*Controller.java` - REST endpoints
+- `infrastructure/src/main/java/com/btg/infrastructure/persistence/<도메인>/adapter/*PersistenceAdapter.java` - Port implementations
+- `infrastructure/src/main/java/com/btg/infrastructure/security/jwt/JwtTokenAdapter.java` - JWT wrapper
 
 ---
 
 ## 📁 Package Organization
 
+도메인별 하위 패키지(`auth`, `user`, `group`, `task`, `dailyprogress`)로 한 단계 더 나눈다.
+
 ### Domain Layer (`domain/src/main/java/com/btg/core/`)
 ```
 application/
   port/
-    in/              - *UseCase.java (interfaces)
-    out/             - *Port.java (interfaces)
-  service/           - *Service.java (implements Use Cases)
+    in/<도메인>/     - *UseCase.java (interfaces)
+    out/<도메인>/    - *Port.java (interfaces)
+  service/<도메인>/  - *Service.java (implements Use Cases)
 ```
 
 ### Infrastructure Layer (`infrastructure/src/main/java/com/btg/infrastructure/`)
 ```
-web/                 - *Controller.java, dto/request, dto/response
-persistence/         - entity/, repository/, adapter/*PersistenceAdapter.java
-security/            - jwt/*Adapter.java, config/
-config/              - Bean configurations
+web/<도메인>/         - *Controller.java, dto/request, dto/response
+persistence/<도메인>/ - entity/, repository/, adapter/*PersistenceAdapter.java
+security/             - jwt/, PasswordEncoderAdapter.java, SecurityContextUtil.java
+config/               - Bean configurations
 ```
 
-### Test Organization (`app/src/test/`)
+### Test Organization (`app/src/test/java/com/btg/`)
 ```
-integration/         - MockMvc + @MockitoBean (fast)
-e2e/                - @SpringBootTest(RANDOM_PORT) + real DB (slow, complete)
+integration/         - IntegrationTestBase 상속, MockMvc + @MockitoBean (fast)
+e2e/                 - @SpringBootTest(RANDOM_PORT) + TestRestTemplate (slow)
 ```
+
+서비스 단위 테스트는 `domain/src/test/java/com/btg/core/application/service/<도메인>/`에 둔다.
 
 ---
 
@@ -185,20 +232,22 @@ public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
 
 | Type | Scope | Tools | Mocks | Speed | When to Use |
 |------|-------|-------|-------|-------|-------------|
-| E2E | Full stack | TestRestTemplate, H2, @Transactional | None (real impl) | Slow | Critical flows |
-| Integration | HTTP layer | MockMvc, @MockitoBean | Use Cases | Fast | Controller validation |
+| E2E | Full stack | TestRestTemplate, H2 | 대상 외 Use Case만 | Slow | Critical flows |
+| Integration | HTTP layer | MockMvc, @MockitoBean | 모든 Use Case | Fast | Controller validation |
 | Unit | Business logic | JUnit, Mockito | Ports | Very fast | Service logic |
 
 `@DisplayName`은 한글로 쓴다. 메서드명은 자바 식별자이므로 영어를 유지한다.
 
-**E2E Test Template** (`app/src/test/java/*/e2e/`):
+E2E는 검증 대상 Controller의 Use Case만 실제 구현으로 두고, 나머지 Use Case는 컨텍스트 로딩을 위해 Mock으로 채운다. 기존 E2E는 `@MockBean`, Integration은 `@MockitoBean`을 쓴다.
+
+**E2E Test Template** (`app/src/test/java/com/btg/e2e/`):
 ```java
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
-@Transactional
 class AuthControllerE2ETest {
     @Autowired TestRestTemplate restTemplate;
     @Autowired UserJpaRepository userRepo;
+    @MockBean GetUserProfileUseCase getUserProfileUseCase;  // 대상 외 Use Case
 
     @Test
     void signup_Success() {
@@ -210,7 +259,7 @@ class AuthControllerE2ETest {
 }
 ```
 
-**Integration Test Template** (`app/src/test/java/*/integration/`):
+**Integration Test Template** (`app/src/test/java/com/btg/integration/`):
 ```java
 @SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test")
 class AuthControllerIntegrationTest extends IntegrationTestBase {
@@ -241,7 +290,7 @@ private final JwtTokenProvider provider;
 infrastructure/port/out/TokenPort.java  // WRONG!
 ```
 
-**Fix**: All Ports belong in `domain/application/port/`
+**Fix**: All Ports belong in the `domain` module, under `com.btg.core.application.port`
 
 ### ❌ Direct Technology Usage in Domain
 ```java
@@ -257,13 +306,13 @@ private final RedisTemplate redis;        // WRONG!
 ## 📋 Quick Reference: File Creation Workflow
 
 **Adding New Feature** (e.g., "Password Reset"):
-1. Define Use Case: `domain/port/in/auth/ResetPasswordUseCase.java`
-2. Check/Create Outbound Ports: `domain/port/out/auth/SendEmailPort.java`
-3. Implement Service: `domain/service/auth/ResetPasswordService.java`
-4. Implement Adapters: `infrastructure/email/SmtpEmailAdapter.java`
-5. Add Controller: `infrastructure/web/auth/AuthController.java`
-6. Create DTOs: `infrastructure/web/auth/dto/request/ResetPasswordRequest.java`
-7. Write E2E Test: `app/test/e2e/AuthControllerE2ETest.java`
+1. Define Use Case: `domain/src/main/java/com/btg/core/application/port/in/auth/ResetPasswordUseCase.java`
+2. Check/Create Outbound Ports: `domain/src/main/java/com/btg/core/application/port/out/auth/SendEmailPort.java`
+3. Implement Service: `domain/src/main/java/com/btg/core/application/service/auth/ResetPasswordService.java`
+4. Implement Adapters: `infrastructure/src/main/java/com/btg/infrastructure/email/SmtpEmailAdapter.java`
+5. Add Controller: `infrastructure/src/main/java/com/btg/infrastructure/web/auth/AuthController.java`
+6. Create DTOs: `infrastructure/src/main/java/com/btg/infrastructure/web/auth/dto/request/ResetPasswordRequest.java`
+7. Write E2E Test: `app/src/test/java/com/btg/e2e/AuthControllerE2ETest.java`
 
 ---
 
@@ -271,7 +320,7 @@ private final RedisTemplate redis;        // WRONG!
 
 When reviewing code, verify:
 - [ ] No `import com.btg.infrastructure.*` in `domain/` module
-- [ ] All Ports defined in `domain/application/port/`
+- [ ] All Ports defined in the `domain` module, under `com.btg.core.application.port`
 - [ ] All Adapters in `infrastructure/`
 - [ ] Services only depend on Port interfaces, never concrete classes
 - [ ] Controllers only depend on Use Case interfaces
