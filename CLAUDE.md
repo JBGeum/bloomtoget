@@ -71,64 +71,6 @@ CI는 `.github/workflows/build.yml` 하나이며 main push와 모든 PR에서 `.
 
 ---
 
-## 🏗️ Module Structure
-
-```
-bloomtoget/
-├── domain/          - Business logic, Port interfaces (JPA·web·security 독립)
-├── infrastructure/  - Adapters, Controllers, Repositories (depends on domain)
-└── app/            - Assembly, Configuration, Main class
-```
-
-### Module Dependencies
-
-```gradle
-domain:          spring-boot-starter-validation + spring-tx
-infrastructure:  domain + web + jpa + security + jwt + mapstruct
-app:             domain + infrastructure
-```
-
-**Key Files** (`<도메인>` = `auth` · `user` · `group` · `task` · `dailyprogress`):
-- `domain/src/main/java/com/btg/core/application/port/in/<도메인>/*UseCase.java` - Inbound Ports (Use Cases)
-- `domain/src/main/java/com/btg/core/application/port/out/<도메인>/*Port.java` - Outbound Ports (External systems)
-- `domain/src/main/java/com/btg/core/application/service/<도메인>/*Service.java` - Business logic (implements Use Cases)
-- `infrastructure/src/main/java/com/btg/infrastructure/web/<도메인>/*Controller.java` - REST endpoints
-- `infrastructure/src/main/java/com/btg/infrastructure/persistence/<도메인>/adapter/*PersistenceAdapter.java` - Port implementations
-- `infrastructure/src/main/java/com/btg/infrastructure/security/jwt/JwtTokenAdapter.java` - JWT wrapper
-
----
-
-## 📁 Package Organization
-
-도메인별 하위 패키지(`auth`, `user`, `group`, `task`, `dailyprogress`)로 한 단계 더 나눈다.
-
-### Domain Layer (`domain/src/main/java/com/btg/core/`)
-```
-application/
-  port/
-    in/<도메인>/     - *UseCase.java (interfaces)
-    out/<도메인>/    - *Port.java (interfaces)
-  service/<도메인>/  - *Service.java (implements Use Cases)
-```
-
-### Infrastructure Layer (`infrastructure/src/main/java/com/btg/infrastructure/`)
-```
-web/<도메인>/         - *Controller.java, dto/request, dto/response
-persistence/<도메인>/ - entity/, repository/, adapter/*PersistenceAdapter.java
-security/             - jwt/, PasswordEncoderAdapter.java, SecurityContextUtil.java
-config/               - Bean configurations
-```
-
-### Test Organization (`app/src/test/java/com/btg/`)
-```
-integration/         - IntegrationTestBase 상속, MockMvc + @MockitoBean (fast)
-e2e/                 - @SpringBootTest(RANDOM_PORT) + TestRestTemplate (slow)
-```
-
-서비스 단위 테스트는 `domain/src/test/java/com/btg/core/application/service/<도메인>/`에 둔다.
-
----
-
 ## 🎨 Coding Patterns & Preferences
 
 ### When to Create Ports
@@ -163,69 +105,6 @@ DTOs:             {Noun}Request/Response   (SignupRequest, UserResponse)
 3. **Simplification over Patterns**: Question necessity of each abstraction layer
 4. **Code Clarity**: Optimize for reading/debugging, not theoretical reusability
 
-### Standard Patterns
-
-**Use Case Interface** (in `domain/port/in/`):
-```java
-public interface SignupUseCase {
-    UserResult signup(SignupCommand command);
-    record SignupCommand(String email, String password, String name) {
-        public void validate() { /* self-validation */ }
-    }
-    record UserResult(Long id, String email, String name, String createdAt) {}
-}
-```
-
-**Service Implementation** (in `domain/service/`):
-```java
-@Service
-@RequiredArgsConstructor
-@Transactional
-public class SignupService implements SignupUseCase {
-    private final SaveUserPort saveUserPort;  // Outbound Ports only
-    private final LoadUserPort loadUserPort;
-
-    @Override
-    public UserResult signup(SignupCommand command) {
-        command.validate();
-        // business logic
-        return new UserResult(...);
-    }
-}
-```
-
-**Controller Pattern** (in `infrastructure/web/`):
-```java
-@RestController
-@RequiredArgsConstructor
-public class AuthController {
-    private final SignupUseCase signupUseCase;  // Use Case only
-
-    @PostMapping("/auth/signup")
-    public ResponseEntity<UserResponse> signup(@Valid @RequestBody SignupRequest request) {
-        var command = new SignupUseCase.SignupCommand(...);  // DTO → Command
-        var result = signupUseCase.signup(command);          // Execute
-        return ResponseEntity.ok(new UserResponse(...));     // Result → DTO
-    }
-}
-```
-
-**Adapter Pattern** (in `infrastructure/persistence/` or `security/`):
-```java
-@Component
-@RequiredArgsConstructor
-public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
-    private final UserJpaRepository repository;
-
-    @Override
-    public SaveUserPort.User save(String email, String password, String name) {
-        var entity = new UserJpaEntity(email, password, name);
-        var saved = repository.save(entity);
-        return new SaveUserPort.User(...);  // Entity → Port record
-    }
-}
-```
-
 ---
 
 ## 🧪 Testing Strategy
@@ -239,38 +118,6 @@ public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
 `@DisplayName`은 한글로 쓴다. 메서드명은 자바 식별자이므로 영어를 유지한다.
 
 E2E는 검증 대상 Controller의 Use Case만 실제 구현으로 두고, 나머지 Use Case는 컨텍스트 로딩을 위해 Mock으로 채운다. 기존 E2E는 `@MockBean`, Integration은 `@MockitoBean`을 쓴다.
-
-**E2E Test Template** (`app/src/test/java/com/btg/e2e/`):
-```java
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test")
-class AuthControllerE2ETest {
-    @Autowired TestRestTemplate restTemplate;
-    @Autowired UserJpaRepository userRepo;
-    @MockBean GetUserProfileUseCase getUserProfileUseCase;  // 대상 외 Use Case
-
-    @Test
-    void signup_Success() {
-        var response = restTemplate.postForEntity("/auth/signup",
-            new HttpEntity<>(json, headers), String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(userRepo.findByEmail("test@example.com")).isPresent();
-    }
-}
-```
-
-**Integration Test Template** (`app/src/test/java/com/btg/integration/`):
-```java
-@SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test")
-class AuthControllerIntegrationTest extends IntegrationTestBase {
-    @Test
-    void signup_Success() throws Exception {
-        when(signupUseCase.signup(any())).thenReturn(mockResult);
-        mockMvc.perform(post("/auth/signup").content(json))
-            .andExpect(status().isCreated());
-    }
-}
-```
 
 ---
 
@@ -326,23 +173,3 @@ When reviewing code, verify:
 - [ ] Controllers only depend on Use Case interfaces
 - [ ] Tests exist for new features (E2E + Unit preferred)
 
----
-
-## 🎯 Key Patterns Summary
-
-```
-Flow: Request → Controller → Use Case → Service → Port → Adapter → External System
-
-Dependency: Infrastructure → Domain (one-way)
-
-Naming:
-  - Use Cases: {Action}UseCase
-  - Ports: {Verb}{Noun}Port
-  - Adapters: {Tech}Adapter
-  - Services: {Noun}Service
-
-Testing:
-  - E2E: Real server + real DB (@SpringBootTest RANDOM_PORT)
-  - Integration: MockMvc + mocked Use Cases
-  - Unit: Pure logic + mocked Ports
-```
